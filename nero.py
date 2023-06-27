@@ -11,7 +11,7 @@ import random
 from collections import deque
 
 
-logging.basicConfig(filename='myapp.log', level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 # Set up the clients (ENTER YOUR OWN SESSION PROPERTIES!!!!!!)
 api_id_1 = 22491024
@@ -192,16 +192,20 @@ async def main():
 
         # If the client is already disconnected (according to our flags), we don't want to start it again
         if client_disconnect_flags[name]:
+            logging.info(f"Client {name} is marked as disconnected, skipping start.")
             print(f"Client {name} is marked as disconnected, skipping start.")
             return
         try:
             await client.start()
+            logging.info(f'{name} started and connected')
             print(f'{name} started and connected')
         except Exception as e:
+            logging.error(f'Error with {name}: {e}')
             print(f'Error with {name}: {e}')
             # If the client is not marked as disconnected, it means this disconnect was unintentional and we want to reconnect
             if not client_disconnect_flags[name]:
                 print(f'Restarting {name} in 5 seconds')
+                logging.info(f'Restarting {name} in 5 seconds')
                 await asyncio.sleep(5)  # wait for 5 seconds before attempting to reconnect
                 await start_client(client, name)
 
